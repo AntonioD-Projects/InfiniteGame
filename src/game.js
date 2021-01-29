@@ -1,7 +1,9 @@
 //TO DO:
-//restart the game after losing
-//a way to get to a new room
-//bug fix: text changes sizes slightly when moving
+//Restart the game after losing
+//A way to get to a new room
+//Bug: Text changes sizes slightly when moving
+//Cleanup: Easier way to check what's directly next to a space on the grid
+//Cleanup: Reorganize functions and variables so they're in a more logical order
 
 //setup game
 function setup() {
@@ -183,9 +185,10 @@ console.log("Door X:");
 console.log(doorX);
 console.log("Door Y:");
 console.log(doorY);
+console.log(grid);
 
 /*
-Doesn't show up if:
+Health item and door don't show up if:
 X equals 1 or 9
 Y equals 1 or 9
 grid x is 10
@@ -194,6 +197,8 @@ Graphically, x is 10 and y is 9
 Should the graph be redrawn to display one more row vertically?
 
 There's also an error if the door or health item is spawned on the same spot
+
+NOTE: The first two columns of grid, printed in the log, are walls.
 */
 
 function getRandomIntInclusive(min, max) {
