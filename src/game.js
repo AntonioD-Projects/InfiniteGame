@@ -1,6 +1,8 @@
 //TO DO:
 //Restart the game after losing
 //A way to get to a new room
+//Rooms change in size when a new one is entered
+//The player should start the room from the space where the door was in the last room
 //Bug: Text changes sizes slightly when moving
 //Cleanup: Easier way to check what's directly next to a space on the grid
 //Cleanup: Reorganize functions and variables so they're in a more logical order
