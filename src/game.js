@@ -1,36 +1,45 @@
-//TO DO:
-//Restart the game after losing
-//A way to get to a new room
-//Rooms change in size when a new one is entered
-//The player should start the room from the space where the door was in the last room
-//Bug: Text changes sizes slightly when moving
-//Cleanup: Easier way to check what's directly next to a space on the grid
-//Cleanup: Reorganize functions and variables so they're in a more logical order
+/*TO DO:
+*A way to get to a new room
+**Rooms change in size when a new one is entered
+**The player should start the room from the space where the door was in the last room
+*Restart the game after losing
+*Enemies spawn in a random place
 
-//setup game
+*Maybe something to prevent enemies/doors/items from spawning too close to the player
+*Maybe add CSS to the HTML pages. It's not needed, but it would make the pages look better.
+
+BUG: Text changes sizes slightly when moving. Is there a way to do it with percents instead of always being a set pixel size?
+CLEANUP: An easier way to check what's directly next to a space on the grid. getGridPosition is only for the player, it should be able to go from any position.
+CLEANUP: Reorganize functions and variables so they're in a more logical order*/
+
+//Create the canvas
 function setup() {
   createCanvas(600, 800);
 }
 
-//draw the grid
+//Draw the grid
 function draw() {
   for(var i = 0; i < 10; i++){
     for(var j = 0; j < 10; j++){
-      if (grid[i][j] == "wall"){
-        textSize(50);
-        text("--", i*60, j*60)  
-      }
-      if (grid[i][j] == "player"){
-        text("P", i*60, j*60)  
-      }
-      if (grid[i][j] == "enemy"){
-        text("E", i*60, j*60)  
-      }
-      if (grid[i][j] == "healthItem"){
-        text("H", i*60, j*60)  
-      }
-      if (grid[i][j] == "door"){
-        text("D", i*60, j*60)  
+      xPos = 60 * i;
+      yPos = (60 * j) + 60;
+      textSize(50);
+      switch(grid[i][j]) {
+        case "wall":
+          text("--", xPos, yPos)
+          break
+        case "player":
+          text("P", xPos, yPos)
+          break
+        case "enemy":
+          text("E", xPos, yPos)
+          break
+        case "healthItem":
+          text("H", xPos, yPos)
+          break
+        case "door":
+          text("D", xPos, yPos)
+          break
       }
       //rect(i*60, j*60, 60, 60);
     }
@@ -38,15 +47,16 @@ function draw() {
   drawPlayerHealth();
 }
 
+//Draw the health at the bottom of the screen
 function drawPlayerHealth() {
   //textSize(32);
   var healthX = 0;
-  var healthY = 600;
+  var healthY = 660;
   text("Your Health:", healthX, healthY)
   fill("red")
   for(var i = 0; i < playerHealth; i++){
-    healthX = healthX + 40;
     text("H", healthX, healthY + 50)
+    healthX = healthX + 40;
   }
   if (playerHealth < 1) {
     drawGameOver();
@@ -55,6 +65,7 @@ function drawPlayerHealth() {
   fill("black")
 }
 
+//If the player runs out of health, draw this text
 function drawGameOver() {
   fill("red")
   text("You've run out of health!", 10, 300)
@@ -72,6 +83,9 @@ var healthItemX = 0;
 var healthItemY = 0;
 var doorX = 0;
 var doorY = 0;
+var enemyX = 3;
+var enemyY = 3;
+var enemyDirection = 0;
 
 for(var i = 0; i < width; i++){
   grid.push([]);
@@ -80,7 +94,7 @@ for(var i = 0; i < width; i++){
   }
 }
 for(var i = 1; i < width - 1; i++){
-  for(var j = 2; j < height - 1; j++){
+  for(var j = 1; j < height - 1; j++){
     grid[i][j] = "floor";
   }
 }
@@ -157,6 +171,10 @@ function keyPressed() {
       playerHealth = playerHealth + 1;
       grid[healthItemX][healthItemY] = "floor";
     }
+    if (getGridPosition(keyCode) == "door") {
+      console.log("Door has been activated")
+      //We need a function that creates a new room
+    }
     if ((keyCode === LEFT_ARROW) && (grid[playerX - 1][playerY] == "floor")) {
       playerX = playerX - 1;
     } else if ((keyCode === RIGHT_ARROW) && (grid[playerX + 1][playerY] == "floor")) {
@@ -173,12 +191,12 @@ function keyPressed() {
   }
 }
 
-enemyX = 3;
-enemyY = 3;
-enemyDirection = 0;
+//Run functions to spawn objects
 enemyMove();
 createHealthItem();
 createDoor();
+
+//Debug: console messages that show variables
 console.log("Health item X:");
 console.log(healthItemX);
 console.log("Health item Y:");
@@ -189,20 +207,7 @@ console.log("Door Y:");
 console.log(doorY);
 console.log(grid);
 
-/*
-Health item and door don't show up if:
-X equals 1 or 9
-Y equals 1 or 9
-grid x is 10
-grid y is 10
-Graphically, x is 10 and y is 9
-Should the graph be redrawn to display one more row vertically?
-
-There's also an error if the door or health item is spawned on the same spot
-
-NOTE: The first two columns of grid, printed in the log, are walls.
-*/
-
+//Better version of math.random()
 function getRandomIntInclusive(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
