@@ -1,26 +1,31 @@
 /*TO DO:
-*A way to get to a new room
-**Rooms change in size when a new one is entered
-**The player should start the room from the space where the door was in the last room
-*Restart the game after losing
-*Enemies spawn in a random place
+Important features:
+*A way to get to a new room.
+*Rooms change in size when a new one is entered.
+*Restart the game after losing.
+*Enemies spawn in a random place.
+*Enemy should be a class so that multiple can spawn at once.
 
-*Maybe something to prevent enemies/doors/items from spawning too close to the player
-*Maybe add CSS to the HTML pages. It's not needed, but it would make the pages look better.
+Possible additions:
+*Add limits to how close an object can spawn to the player. I've already made it so they can't spawn on the same place, but having them not spawn directly next to each other would work too.
+*Add CSS to the HTML pages. It's not needed, but it would make the pages look better.
+*CHECK: Do enemies move before or after the room is drawn? They should spawn in as it's drawn, but only move after the player first moves.
 
-BUG: Text changes sizes slightly when moving. Is there a way to do it with percents instead of always being a set pixel size?
-CLEANUP: An easier way to check what's directly next to a space on the grid. getGridPosition is only for the player, it should be able to go from any position.
-CLEANUP: Reorganize functions and variables so they're in a more logical order*/
+Backend improvements:
+*BUG: Text changes sizes slightly when moving. Is there a way to do it with percents instead of always being a set pixel size?
+*CLEANUP: An easier way to check what's directly next to a space on the grid. getGridPosition is only for the player, it should be able to go from any position.
+*CLEANUP: Reorganize functions and variables so they're in a more logical order.
+*/
 
 //Create the canvas
 function setup() {
-  createCanvas(600, 800);
+  createCanvas(800, 800);
 }
 
 //Draw the grid
 function draw() {
-  for(var i = 0; i < 10; i++){
-    for(var j = 0; j < 10; j++){
+  for(var i = 0; i < roomWidth; i++){
+    for(var j = 0; j < roomHeight; j++){
       xPos = 60 * i;
       yPos = (60 * j) + 60;
       textSize(50);
@@ -45,13 +50,16 @@ function draw() {
     }
   }
   drawPlayerHealth();
+  console.log(roomWidth);
+  console.log(roomHeight);
+  console.log("Screen displays successfully");
 }
 
 //Draw the health at the bottom of the screen
 function drawPlayerHealth() {
   //textSize(32);
   var healthX = 0;
-  var healthY = 660;
+  var healthY = (roomHeight * 60) + 60;
   text("Your Health:", healthX, healthY)
   fill("red")
   for(var i = 0; i < playerHealth; i++){
@@ -74,9 +82,16 @@ function drawGameOver() {
 
 //  playerHealth * "♡"
 
+/*
+roomWidth and roomHeight size limits:
+
+width: 3 is the minimum it can be without breaking. 6 seems like a good minimum. Anything above 13 has the walls go off-screen.
+height: Below 5: Enemy spawns inside walls. Above 11: Health goes off-screen.
+*/
+
 var grid = [];
-var width = 10;
-var height = 10;
+var roomWidth = 13;//getRandomIntInclusive(6, 13);
+var roomHeight = 11; //getRandomIntInclusive(6, 11);
 var playerHealth = 5;
 var gameRunning = true;
 var healthItemX = 0;
@@ -87,21 +102,21 @@ var enemyX = 3;
 var enemyY = 3;
 var enemyDirection = 0;
 
-for(var i = 0; i < width; i++){
+for(var i = 0; i < roomWidth; i++){
   grid.push([]);
-  for(var j = 0; j < height; j++){
+  for(var j = 0; j < roomHeight; j++){
     grid[i].push("wall");
   }
 }
-for(var i = 1; i < width - 1; i++){
-  for(var j = 1; j < height - 1; j++){
+for(var i = 1; i < roomWidth - 1; i++){
+  for(var j = 1; j < roomHeight - 1; j++){
     grid[i][j] = "floor";
   }
 }
 
-//enemy movement
+//Enemy movement
 function enemyMove(){
-  grid[enemyX][enemyY] = "floor"
+  grid[enemyX][enemyY] = "floor";
   enemyDirection = getRandomIntInclusive(1,4);
   enemyDirection = Math.round(enemyDirection);
   if ((enemyDirection == 1) && (grid[enemyX - 1][enemyY] == "floor")){
@@ -127,9 +142,9 @@ function enemyMove(){
 
 function createHealthItem() {
   while (grid[healthItemX][healthItemY] != "floor") {
-    healthItemX = getRandomIntInclusive(1,(width - 1));
+    healthItemX = getRandomIntInclusive(1,(roomWidth - 1));
     healthItemX = Math.round(healthItemX);
-    healthItemY = getRandomIntInclusive(2,(width - 1));
+    healthItemY = getRandomIntInclusive(2,(roomWidth - 1));
     healthItemY = Math.round(healthItemX);
   }
   grid[healthItemX][healthItemY] = "healthItem";
@@ -137,9 +152,9 @@ function createHealthItem() {
 
 function createDoor() {
   while (grid[doorX][doorY] != "floor") {
-    doorX = getRandomIntInclusive(1,(width - 1));
+    doorX = getRandomIntInclusive(1,(roomWidth - 1));
     doorX = Math.round(doorX);
-    doorY = getRandomIntInclusive(2,(height - 1));
+    doorY = getRandomIntInclusive(2,(roomHeight - 1));
     doorY = Math.round(doorY);
   }
   grid[doorX][doorY] = "door";
@@ -157,7 +172,7 @@ function getGridPosition(keyCode) {
   }
 }
 
-//player movement
+//Player movement
 playerX = 1;
 playerY = 2;
 grid[playerX][playerY] = "player";
