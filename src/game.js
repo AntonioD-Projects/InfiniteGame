@@ -1,19 +1,18 @@
 /*TO DO:
 Important features:
-*A way to get to a new room.
-*Rooms change in size when a new one is entered.
 *Restart the game after losing.
-*Enemies spawn in a random place.
-*Enemy should be a class so that multiple can spawn at once.
+*Allow multiple enemies to spawn at once.
 
 Possible additions:
 *Add limits to how close an object can spawn to the player. I've already made it so they can't spawn on the same place,
 but having them not spawn directly next to each other would work too.
 *Add CSS to the HTML pages. It's not needed, but it would make the pages look better.
+*Maybe color-code some of the text.
 *CHECK: Do enemies move before or after the room is drawn? They should spawn in as it's drawn, but only move after the player first moves.
 
 Backend improvements:
 *BUG: Text changes sizes slightly when moving. Is there a way to do it with percents instead of always being a set pixel size?
+*BUG: Add a health cap
 *CLEANUP: An easier way to check what's directly next to a space on the grid. getGridPosition is only for the player, it should be able to go from any position.
 *CLEANUP: Reorganize functions and variables so they're in a more logical order.
 */
@@ -85,38 +84,13 @@ roomWidth and roomHeight size limits:
 
 width: 3 is the minimum it can be without breaking. 6 seems like a good minimum. Anything above 13 has the walls go off-screen.
 height: Below 5: Enemy spawns inside walls. Above 11: Health goes off-screen.
+
+Recommended: Between 6-13 for X and 5-11 for Y.
 */
 
-var room = new Room(10, 10);
+var room = new Room(10, 10); //I'm not sure if I need this
 var playerHealth = 5;
 var gameRunning = true;
-var enemyX = 3;
-var enemyY = 3;
-room.grid[enemyX][enemyY] = "enemy";
-var enemyDirection = 0;
-
-//Enemy movement
-//This enemy moves properly. There is a duplicate enemy that appears somewhere.
-
-//The enemy can sometimes spawn over the health item. Use the console to figure out what the variable is set as.
-function enemyMove(){
-  room.grid[enemyX][enemyY] = "floor";
-  enemyDirection = getRandomIntInclusive(0,3);
-  enemyDirection = Math.round(enemyDirection);
-  movesX = [-1,1,0,0];
-  movesY = [0,0,-1,1];
-  newX = enemyX + movesX[enemyDirection];
-  newY = enemyY + movesY[enemyDirection];
-  if ((room.grid[newX][newY] == "floor")){
-    enemyX = newX;
-    enemyY = newY;
-  }
-  if ((room.grid[newX][newY] == "player")){
-    playerHealth = playerHealth - 1;
-  }
-  room.grid[enemyX][enemyY] = "enemy";
-  console.log("Enemy is at: (" + str(newX) + "," + str(newY) + ")")
-}
 
 function getGridPosition(keyCode) {
   if ((keyCode === LEFT_ARROW) || (keyCode == 1)) {
@@ -129,6 +103,8 @@ function getGridPosition(keyCode) {
     return room.grid[playerX][playerY + 1];
   }
 }
+
+//Right now, the player can spawn out of bounds when the room gets resized. Make sure they spawn in the grid.
 
 //Player movement
 playerX = 1;
@@ -145,8 +121,11 @@ function keyPressed() {
       room.grid[room.healthItemX][room.healthItemY] = "floor";
     }
     if (getGridPosition(keyCode) == "door") {
-      console.log("Door has been activated")
-      room.generateRoom();
+      newRoomWidth = getRandomIntInclusive(6,13);
+      newRoomHeight = getRandomIntInclusive(5,11);
+      room.generateRoom(newRoomWidth, newRoomHeight);
+      console.log("Room width is " + String(newRoomWidth));
+      console.log("Room height is " + String(newRoomHeight));
     }
     if ((keyCode === LEFT_ARROW) && (room.grid[playerX - 1][playerY] == "floor")) {
       playerX = playerX - 1;
@@ -159,8 +138,7 @@ function keyPressed() {
     }
     background("#FFFFFF");
     room.grid[playerX][playerY] = "player";
-    room.grid[enemyX][enemyY] = "enemy";
-    enemyMove();
+    room.enemyMove();
   }
 }
 
